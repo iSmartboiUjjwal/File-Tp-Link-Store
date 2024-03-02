@@ -10,7 +10,9 @@ from config import ADMINS, FORCE_MSG, START_MSG, CUSTOM_CAPTION, DISABLE_CHANNEL
 from helper_func import subscribed, encode, decode, get_messages
 from database.database import add_user, del_user, full_userbase, present_user
 
-
+"""add time im seconds for waitingwaiting before delete 
+1min=60, 2min=60×2=120, 5min=60×5=300"""
+SECONDS = int(os.getenv("SECONDS", "600"))
 
 
 @Bot.on_message(filters.command('start') & filters.private & subscribed)
@@ -58,6 +60,7 @@ async def start_command(client: Client, message: Message):
             return
         await temp_msg.delete()
 
+        Ujjwal = []
         for msg in messages:
 
             if bool(CUSTOM_CAPTION) & bool(msg.document):
@@ -71,13 +74,25 @@ async def start_command(client: Client, message: Message):
                 reply_markup = None
 
             try:
-                await msg.copy(chat_id=message.from_user.id, caption = caption, parse_mode = ParseMode.HTML, reply_markup = reply_markup, protect_content=PROTECT_CONTENT)
+                uj = await msg.copy(chat_id=message.from_user.id, caption = caption, parse_mode = ParseMode.HTML, reply_markup = reply_markup, protect_content=PROTECT_CONTENT)
                 await asyncio.sleep(0.5)
+                Ujjwal.append(uj)
             except FloodWait as e:
                 await asyncio.sleep(e.x)
-                await msg.copy(chat_id=message.from_user.id, caption = caption, parse_mode = ParseMode.HTML, reply_markup = reply_markup, protect_content=PROTECT_CONTENT)
+                uj = await msg.copy(chat_id=message.from_user.id, caption = caption, parse_mode = ParseMode.HTML, reply_markup = reply_markup, protect_content=PROTECT_CONTENT)
+                Ujjwal.append(uj)
             except:
                 pass
+
+        await message.reply_text("**Files will be deleted in 10 minutes.**\n__Forward to saved messages before downloading__")
+        await asyncio.sleep(SECONDS)
+
+        for data in Ujjwal:
+            try:
+                await data.delete()
+            except:
+                pass
+
         return
     else:
         reply_markup = InlineKeyboardMarkup(
